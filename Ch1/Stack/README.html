@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack (스택)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #3498db;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #34495e;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-left: 0.5rem;
+            border-left: 4px solid #3498db;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #555;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.7;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e83e8c;
+        }
+
+        pre {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: 0.9rem;
+        }
+
+        strong {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stack (스택)</h1>
+
+        <h2>개요</h2>
+        <p>스택은 LIFO(Last In, First Out) 원칙을 따르는 선형 자료구조입니다. 마지막에 들어온 데이터가 먼저 나가는 구조로, 함수 호출, 괄호 검사, 실행 취소 등에 활용됩니다.</p>
+
+        <h2>파일 구조</h2>
+        <ul>
+            <li><code>Stack.ts</code>: 스택 클래스 구현 및 사용 예제</li>
+        </ul>
+
+        <h2>상세 해설</h2>
+
+        <h3>Stack.ts</h3>
+
+        <h4>1. IStack 인터페이스</h4>
+        <pre><code>interface IStack<T> {
+    push(element: T): void;
+    pop(): T | undefined;
+    peek(): T | undefined;
+    isEmpty(): boolean;
+    size(): number;
+    clear(): void;
+}</code></pre>
+        <p><strong>주요 메서드</strong>:</p>
+        <ul>
+            <li><code>push</code>: 스택에 요소 추가</li>
+            <li><code>pop</code>: 스택에서 요소 제거 및 반환</li>
+            <li><code>peek</code>: 맨 위 요소 확인 (제거하지 않음)</li>
+            <li><code>isEmpty</code>: 스택이 비어있는지 확인</li>
+            <li><code>size</code>: 스택의 크기 반환</li>
+            <li><code>clear</code>: 스택 초기화</li>
+        </ul>
+
+        <h4>2. Stack 클래스 구현</h4>
+        <pre><code>export class Stack<T> implements IStack<T> {
+    private items: T[] = [];
+
+    push(element: T): void {
+        this.items.push(element);
+    }
+
+    pop(): T | undefined {
+        return this.items.pop();
+    }
+
+    isEmpty(): boolean {
+        return this.items.length === 0;
+    }
+
+    size(): number {
+        return this.items.length;
+    }
+    
+    clear(): void {
+        this.items = [];
+    }
+
+    peek(): T | undefined {
+        return this.items[this.items.length - 1];
+    }
+}</code></pre>
+        <p><strong>특징</strong>:</p>
+        <ul>
+            <li>제네릭 타입 <code>&lt;T&gt;</code> 사용으로 다양한 타입 지원</li>
+            <li>배열을 내부 저장소로 사용</li>
+            <li><code>push()</code>: 배열 끝에 추가 (O(1))</li>
+            <li><code>pop()</code>: 배열 끝에서 제거 (O(1))</li>
+            <li><code>peek()</code>: 배열의 마지막 요소 접근 (O(1))</li>
+        </ul>
+
+        <h4>3. 사용 예제</h4>
+        <pre><code>const stack = new Stack<number>();
+stack.push(1);
+stack.push(2);
+console.log(stack);
+stack.pop();
+console.log(stack);
+console.log(stack.peek());
+console.log(stack.isEmpty());
+console.log(stack.size());
+stack.clear();
+console.log(stack);</code></pre>
+        <p><strong>실행 결과</strong>:</p>
+        <ul>
+            <li><code>stack.push(1)</code>: 스택에 1 추가</li>
+            <li><code>stack.push(2)</code>: 스택에 2 추가</li>
+            <li><code>stack.pop()</code>: 2 제거 및 반환</li>
+            <li><code>stack.peek()</code>: 현재 맨 위 요소 (1) 확인</li>
+            <li><code>stack.isEmpty()</code>: false (1이 남아있음)</li>
+            <li><code>stack.size()</code>: 1</li>
+            <li><code>stack.clear()</code>: 스택 초기화</li>
+        </ul>
+
+        <h2>스택의 특징</h2>
+
+        <h3>LIFO 원칙</h3>
+        <ul>
+            <li>마지막에 들어온 데이터가 먼저 나감</li>
+            <li>접시 쌓기와 같은 자연스러운 구조</li>
+        </ul>
+
+        <h3>주요 연산</h3>
+        <ul>
+            <li><strong>Push</strong>: 스택에 요소 추가</li>
+            <li><strong>Pop</strong>: 스택에서 요소 제거</li>
+            <li><strong>Peek/Top</strong>: 맨 위 요소 확인</li>
+        </ul>
+
+        <h3>스택 포인터</h3>
+        <ul>
+            <li>현재 스택의 맨 위를 가리키는 포인터</li>
+            <li>배열 구현에서는 <code>length - 1</code> 인덱스</li>
+        </ul>
+
+        <h2>시간복잡도</h2>
+
+        <h3>모든 연산이 O(1)</h3>
+        <ul>
+            <li><strong>Push</strong>: O(1) - 배열 끝에 추가</li>
+            <li><strong>Pop</strong>: O(1) - 배열 끝에서 제거</li>
+            <li><strong>Peek</strong>: O(1) - 마지막 요소 접근</li>
+            <li><strong>isEmpty</strong>: O(1) - 길이 확인</li>
+            <li><strong>Size</strong>: O(1) - 길이 반환</li>
+        </ul>
+
+        <h2>스택의 장단점</h2>
+
+        <h3>장점</h3>
+        <ul>
+            <li><strong>빠른 연산</strong>: 모든 연산이 O(1) 시간복잡도</li>
+            <li><strong>단순한 구조</strong>: 이해하기 쉬움</li>
+            <li><strong>메모리 효율성</strong>: 필요한 만큼만 사용</li>
+            <li><strong>타입 안전성</strong>: 제네릭으로 타입 보장</li>
+        </ul>
+
+        <h3>단점</h3>
+        <ul>
+            <li><strong>제한된 접근</strong>: 맨 위 요소만 접근 가능</li>
+            <li><strong>크기 제한</strong>: 일부 구현에서 고정 크기</li>
+            <li><strong>순서 제약</strong>: LIFO 원칙으로 인한 제약</li>
+        </ul>
+
+        <h2>스택의 활용 사례</h2>
+
+        <h3>1. 함수 호출 스택</h3>
+        <pre><code>function factorial(n: number): number {
+    if (n <= 1) return 1;
+    return n * factorial(n - 1);
+}</code></pre>
+        <ul>
+            <li>재귀 함수 호출 시 스택 프레임 관리</li>
+            <li>각 함수 호출이 스택에 쌓임</li>
+        </ul>
+
+        <h3>2. 괄호 검사</h3>
+        <pre><code>function isValidParentheses(s: string): boolean {
+    const stack: string[] = [];
+    const pairs = { '(': ')', '{': '}', '[': ']' };
+    
+    for (const char of s) {
+        if (pairs[char]) {
+            stack.push(char);
+        } else {
+            const top = stack.pop();
+            if (!top || pairs[top] !== char) {
+                return false;
+            }
+        }
+    }
+    
+    return stack.length === 0;
+}</code></pre>
+
+        <h3>3. 실행 취소 (Undo)</h3>
+        <pre><code>class TextEditor {
+    private undoStack: string[] = [];
+    private redoStack: string[] = [];
+    
+    type(text: string) {
+        this.undoStack.push(text);
+        this.redoStack = []; // 새로운 입력 시 redo 스택 초기화
+    }
+    
+    undo(): string | undefined {
+        const text = this.undoStack.pop();
+        if (text) {
+            this.redoStack.push(text);
+        }
+        return text;
+    }
+    
+    redo(): string | undefined {
+        const text = this.redoStack.pop();
+        if (text) {
+            this.undoStack.push(text);
+        }
+        return text;
+    }
+}</code></pre>
+
+        <h3>4. 깊이 우선 탐색 (DFS)</h3>
+        <pre><code>function dfs(graph: number[][], start: number): number[] {
+    const visited: boolean[] = new Array(graph.length).fill(false);
+    const stack: number[] = [start];
+    const result: number[] = [];
+    
+    while (stack.length > 0) {
+        const current = stack.pop()!;
+        
+        if (!visited[current]) {
+            visited[current] = true;
+            result.push(current);
+            
+            // 인접 노드들을 스택에 추가 (역순으로)
+            for (let i = graph[current].length - 1; i >= 0; i--) {
+                const neighbor = graph[current][i];
+                if (!visited[neighbor]) {
+                    stack.push(neighbor);
+                }
+            }
+        }
+    }
+    
+    return result;
+}</code></pre>
+
+        <h3>5. 후위 표기법 계산</h3>
+        <pre><code>function evaluatePostfix(expression: string): number {
+    const stack: number[] = [];
+    
+    for (const token of expression.split(' ')) {
+        if (/\d+/.test(token)) {
+            stack.push(parseInt(token));
+        } else {
+            const b = stack.pop()!;
+            const a = stack.pop()!;
+            
+            switch (token) {
+                case '+': stack.push(a + b); break;
+                case '-': stack.push(a - b); break;
+                case '*': stack.push(a * b); break;
+                case '/': stack.push(a / b); break;
+            }
+        }
+    }
+    
+    return stack.pop()!;
+}</code></pre>
+
+        <h2>스택 구현 방식</h2>
+
+        <h3>1. 배열 기반 구현 (현재 구현)</h3>
+        <ul>
+            <li><strong>장점</strong>: 간단하고 직관적</li>
+            <li><strong>단점</strong>: 크기 제한 가능성</li>
+        </ul>
+
+        <h3>2. 연결 리스트 기반 구현</h3>
+        <ul>
+            <li><strong>장점</strong>: 동적 크기, 메모리 효율적</li>
+            <li><strong>단점</strong>: 포인터 오버헤드</li>
+        </ul>
+
+        <h3>3. 동적 배열 기반 구현</h3>
+        <ul>
+            <li><strong>장점</strong>: 자동 크기 조정</li>
+            <li><strong>단점</strong>: 재할당 비용</li>
+        </ul>
+
+        <h2>스택 오버플로우</h2>
+        <ul>
+            <li>스택이 가득 찬 상태에서 push 시도</li>
+            <li>재귀 함수에서 무한 호출 시 발생</li>
+            <li>메모리 부족으로 프로그램 중단 가능</li>
+        </ul>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree (트리)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #3498db;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #34495e;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-left: 0.5rem;
+            border-left: 4px solid #3498db;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #555;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.7;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e83e8c;
+        }
+
+        pre {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: 0.9rem;
+        }
+
+        strong {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .highlight {
+            background-color: #fff3cd;
+            padding: 0.1em 0.3em;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tree (트리)</h1>
+
+        <h2>개요</h2>
+        <p>트리는 계층적 구조를 가진 비선형 자료구조입니다. 노드들이 부모-자식 관계로 연결되어 있으며, 이진 탐색 트리(BST)는 검색과 정렬에 효율적인 구조입니다.</p>
+
+        <h2>파일 구조</h2>
+        <ul>
+            <li><code>TreeType.ts</code>: 이진 탐색 트리 클래스 구현</li>
+            <li><code>tree.ts</code>: 트리 사용 예제 및 테스트</li>
+        </ul>
+
+        <h2>상세 해설</h2>
+
+        <h3>TreeType.ts</h3>
+
+        <h4>1. TreeType 인터페이스</h4>
+        <pre><code>export interface TreeType {
+    data: number;
+    left: TreeType | null;
+    right: TreeType | null;
+}</code></pre>
+        <p><strong>특징</strong>:</p>
+        <ul>
+            <li>이진 트리 노드의 구조 정의</li>
+            <li><code>data</code>: 노드에 저장되는 값</li>
+            <li><code>left</code>: 왼쪽 자식 노드 포인터</li>
+            <li><code>right</code>: 오른쪽 자식 노드 포인터</li>
+        </ul>
+
+        <h4>2. Tree 클래스</h4>
+        <pre><code>export class Tree {
+    root: TreeType | null;
+
+    constructor() {
+        this.root = null;
+    }
+}</code></pre>
+        <p><strong>특징</strong>:</p>
+        <ul>
+            <li>루트 노드를 가리키는 포인터</li>
+            <li>빈 트리로 초기화</li>
+        </ul>
+
+        <h4>3. 삽입 연산 (insert)</h4>
+        <pre><code>insert(data: number) {
+    if (this.root === null) {
+        this.root = { data, left: null, right: null };
+        return;
+    }
+
+    let currentNode = this.root;
+    while (currentNode !== null) {
+        if (data < currentNode.data) {
+            if (currentNode.left === null) {
+                currentNode.left = { data, left: null, right: null };
+                break;
+            }
+            currentNode = currentNode.left;
+        } else {
+            if (currentNode.right === null) {
+                currentNode.right = { data, left: null, right: null };
+                break;
+            }
+            currentNode = currentNode.right;
+        }
+    }
+}</code></pre>
+        <p><strong>동작 원리</strong>:</p>
+        <ol>
+            <li>루트가 비어있으면 새 노드를 루트로 설정</li>
+            <li>현재 노드의 값과 비교</li>
+            <li>작으면 왼쪽, 크면 오른쪽으로 이동</li>
+            <li>자식이 없으면 그 위치에 새 노드 삽입</li>
+        </ol>
+
+        <h4>4. 검색 연산 (search)</h4>
+        <pre><code>search(data: number) {
+    let currentNode = this.root;
+    while (currentNode !== null) {
+        if (data === currentNode.data) {
+            return currentNode;
+        }
+        if (data < currentNode.data) {
+            currentNode = currentNode.left;
+        } else {
+            currentNode = currentNode.right;
+        }
+    }
+    return null;
+}</code></pre>
+        <p><strong>동작 원리</strong>:</p>
+        <ol>
+            <li>루트부터 시작하여 값 비교</li>
+            <li>찾는 값이 작으면 왼쪽, 크면 오른쪽으로 이동</li>
+            <li>값을 찾으면 해당 노드 반환</li>
+            <li>찾지 못하면 null 반환</li>
+        </ol>
+
+        <h4>5. 삭제 연산 (delete)</h4>
+        <p><strong>삭제 케이스</strong>:</p>
+        <p><strong>케이스 1: 리프 노드</strong></p>
+        <ul>
+            <li>자식이 없는 노드</li>
+            <li>단순히 부모의 포인터를 null로 설정</li>
+        </ul>
+        <p><strong>케이스 2: 자식이 하나만 있는 노드</strong></p>
+        <ul>
+            <li>자식을 부모의 자식으로 연결</li>
+            <li>부모의 포인터를 자식으로 변경</li>
+        </ul>
+        <p><strong>케이스 3: 자식이 둘 다 있는 노드</strong></p>
+        <ul>
+            <li>오른쪽 서브트리에서 최소값 찾기</li>
+            <li>최소값을 현재 노드로 복사</li>
+            <li>최소값 노드 삭제</li>
+        </ul>
+
+        <h3>tree.ts</h3>
+
+        <h4>1. 기본 사용 예제</h4>
+        <pre><code>const tree = new Tree();
+tree.insert(10);
+tree.insert(8);
+tree.insert(15);
+tree.insert(27);
+tree.insert(88);
+tree.insert(1);
+tree.insert(0);
+tree.insert(17);
+tree.insert(65);
+tree.insert(23);
+tree.insert(32);
+tree.insert(75);
+tree.insert(28);
+tree.delete(27);</code></pre>
+
+        <h4>2. 대규모 테스트</h4>
+        <pre><code>// 랜덤한 100개의 숫자를 생성 (0부터 999 사이)
+const bstNums: Set<number> = new Set<number>();
+while (bstNums.size !== 100) {
+    bstNums.add(Math.floor(Math.random() * 1000));
+}
+
+// 이진 탐색 트리 생성 및 숫자 삽입
+const tree2 = new Tree();
+bstNums.forEach(num => {
+    tree2.insert(num);
+});
+
+// 삽입한 모든 숫자들을 검색하여 테스트
+bstNums.forEach(num => {
+    if (tree2.search(num) === null) {
+        console.log('search failed', num);
+    }
+});
+
+// 랜덤하게 10개의 숫자를 선택하여 삭제
+const deleteNums: Set<number> = new Set<number>();
+const bstNumsArray = Array.from(bstNums);
+while (deleteNums.size !== 10) {
+    const randomIndex = Math.floor(Math.random() * 100);
+    deleteNums.add(bstNumsArray[randomIndex]);
+}
+
+// 선택한 숫자들 삭제 및 확인
+deleteNums.forEach(delNum => {
+    tree2.delete(delNum);
+    if (tree2.search(delNum) !== null) {
+        console.log('delete failed', delNum);
+    }
+});</code></pre>
+
+        <h2>이진 탐색 트리의 특징</h2>
+
+        <h3>BST 성질</h3>
+        <ul>
+            <li>왼쪽 서브트리의 모든 노드 &lt; 현재 노드</li>
+            <li>오른쪽 서브트리의 모든 노드 &gt; 현재 노드</li>
+            <li>중위 순회 시 정렬된 순서로 방문</li>
+        </ul>
+
+        <h3>트리 구조</h3>
+        <pre><code>       10
+      /  \
+     8    15
+    /      \
+   1        27
+  /        /  \
+ 0        17   88</code></pre>
+
+        <h2>시간복잡도</h2>
+
+        <h3>평균 케이스 (균형잡힌 트리)</h3>
+        <ul>
+            <li><strong>삽입</strong>: O(log n)</li>
+            <li><strong>검색</strong>: O(log n)</li>
+            <li><strong>삭제</strong>: O(log n)</li>
+        </ul>
+
+        <h3>최악 케이스 (편향된 트리)</h3>
+        <ul>
+            <li><strong>삽입</strong>: O(n)</li>
+            <li><strong>검색</strong>: O(n)</li>
+            <li><strong>삭제</strong>: O(n)</li>
+        </ul>
+
+        <h2>트리 순회 방식</h2>
+
+        <h3>1. 중위 순회 (Inorder)</h3>
+        <pre><code>function inorderTraversal(root: TreeType | null): number[] {
+    const result: number[] = [];
+    
+    function inorder(node: TreeType | null) {
+        if (node) {
+            inorder(node.left);
+            result.push(node.data);
+            inorder(node.right);
+        }
+    }
+    
+    inorder(root);
+    return result;
+}</code></pre>
+
+        <h3>2. 전위 순회 (Preorder)</h3>
+        <pre><code>function preorderTraversal(root: TreeType | null): number[] {
+    const result: number[] = [];
+    
+    function preorder(node: TreeType | null) {
+        if (node) {
+            result.push(node.data);
+            preorder(node.left);
+            preorder(node.right);
+        }
+    }
+    
+    preorder(root);
+    return result;
+}</code></pre>
+
+        <h3>3. 후위 순회 (Postorder)</h3>
+        <pre><code>function postorderTraversal(root: TreeType | null): number[] {
+    const result: number[] = [];
+    
+    function postorder(node: TreeType | null) {
+        if (node) {
+            postorder(node.left);
+            postorder(node.right);
+            result.push(node.data);
+        }
+    }
+    
+    postorder(root);
+    return result;
+}</code></pre>
+
+        <h2>장단점</h2>
+
+        <h3>장점</h3>
+        <ul>
+            <li><strong>효율적인 검색</strong>: 평균 O(log n) 시간복잡도</li>
+            <li><strong>정렬된 데이터</strong>: 중위 순회로 정렬된 순서</li>
+            <li><strong>동적 구조</strong>: 삽입/삭제가 효율적</li>
+        </ul>
+
+        <h3>단점</h3>
+        <ul>
+            <li><strong>편향 가능성</strong>: 최악의 경우 O(n) 성능</li>
+            <li><strong>균형 문제</strong>: 자동으로 균형을 맞추지 않음</li>
+            <li><strong>복잡한 삭제</strong>: 자식이 둘인 경우 복잡</li>
+        </ul>
+
+        <h2>활용 사례</h2>
+        <ul>
+            <li>데이터베이스 인덱싱</li>
+            <li>파일 시스템 구조</li>
+            <li>컴파일러의 구문 분석 트리</li>
+            <li>게임의 의사결정 트리</li>
+            <li>우선순위 큐 구현</li>
+            <li>정렬 알고리즘 (트리 정렬)</li>
+        </ul>
+
+        <h2>개선 방안</h2>
+
+        <h3>1. 균형 이진 탐색 트리</h3>
+        <ul>
+            <li>AVL 트리</li>
+            <li>Red-Black 트리</li>
+            <li>B-트리</li>
+        </ul>
+
+        <h3>2. 자동 균형 조정</h3>
+        <ul>
+            <li>삽입/삭제 시 자동으로 균형 조정</li>
+            <li>최악의 경우도 O(log n) 보장</li>
+        </ul>
+    </div>
+</body>
+</html>
+

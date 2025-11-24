@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>병합 정렬 (Merge Sort)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #3498db;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #34495e;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-left: 0.5rem;
+            border-left: 4px solid #3498db;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #555;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.7;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e83e8c;
+        }
+
+        pre {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: 0.9rem;
+        }
+
+        strong {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>병합 정렬 (Merge Sort)</h1>
+
+        <p>이 폴더는 병합 정렬 알고리즘의 구현을 포함합니다.</p>
+
+        <h2>파일 목록</h2>
+
+        <h3>MergeSort.ts</h3>
+        <p>병합 정렬 알고리즘의 구현과 테스트 코드입니다.</p>
+
+        <h4>구현된 함수들:</h4>
+        <ul>
+            <li><strong>mergeSort(arr)</strong>: 병합 정렬 메인 함수</li>
+            <li><strong>merge(left, right)</strong>: 두 정렬된 배열을 병합하는 함수</li>
+            <li><strong>arr</strong>: 테스트용 랜덤 배열</li>
+        </ul>
+
+        <h2>병합 정렬 알고리즘</h2>
+
+        <h3>알고리즘 설명</h3>
+        <p>병합 정렬은 <strong>분할 정복(Divide and Conquer)</strong> 방식의 정렬 알고리즘입니다. 배열을 두 개의 균등한 부분으로 분할하고, 각 부분을 재귀적으로 정렬한 후 병합합니다.</p>
+
+        <h3>동작 원리</h3>
+        <ol>
+            <li><strong>분할(Divide)</strong>: 배열을 두 개의 균등한 부분으로 분할</li>
+            <li><strong>정복(Conquer)</strong>: 각 부분을 재귀적으로 정렬</li>
+            <li><strong>병합(Merge)</strong>: 정렬된 두 부분을 하나의 정렬된 배열로 병합</li>
+        </ol>
+
+        <h3>구현</h3>
+
+        <h4>메인 함수</h4>
+        <pre><code>export const mergeSort = (arr: number[]): number[] => {
+  if (arr.length &lt;= 1) return arr;
+  
+  const mid = Math.floor(arr.length / 2);
+  const left = arr.slice(0, mid);
+  const right = arr.slice(mid);
+  return merge(mergeSort(left), mergeSort(right));
+};</code></pre>
+
+        <h4>병합 함수</h4>
+        <pre><code>const merge = (left: number[], right: number[]): number[] => {
+  const result = [];
+  let i = 0;
+  let j = 0;
+  while (i &lt; left.length && j &lt; right.length) {
+    if (left[i] &lt; right[j]) {
+      result.push(left[i]);
+      i++;
+    } else {
+      result.push(right[j]);
+      j++;
+    }
+  }
+  return result.concat(left.slice(i)).concat(right.slice(j));
+};</code></pre>
+
+        <h3>코드 분석</h3>
+
+        <h4>1. 기저 케이스</h4>
+        <pre><code>if (arr.length &lt;= 1) return arr;</code></pre>
+        <ul>
+            <li>배열의 길이가 1 이하일 때는 이미 정렬된 상태로 간주</li>
+        </ul>
+
+        <h4>2. 분할</h4>
+        <pre><code>const mid = Math.floor(arr.length / 2);
+const left = arr.slice(0, mid);
+const right = arr.slice(mid);</code></pre>
+        <ul>
+            <li><code>Math.floor(arr.length / 2)</code>: 중간 인덱스 계산</li>
+            <li><code>slice(0, mid)</code>: 왼쪽 부분 (0부터 mid-1까지)</li>
+            <li><code>slice(mid)</code>: 오른쪽 부분 (mid부터 끝까지)</li>
+        </ul>
+
+        <h4>3. 재귀 호출</h4>
+        <pre><code>return merge(mergeSort(left), mergeSort(right));</code></pre>
+        <ul>
+            <li>왼쪽과 오른쪽 부분을 각각 재귀적으로 정렬</li>
+            <li>정렬된 두 부분을 병합 함수로 전달</li>
+        </ul>
+
+        <h4>4. 병합 과정</h4>
+        <pre><code>while (i &lt; left.length && j &lt; right.length) {
+  if (left[i] &lt; right[j]) {
+    result.push(left[i]);
+    i++;
+  } else {
+    result.push(right[j]);
+    j++;
+  }
+}</code></pre>
+        <ul>
+            <li>두 배열의 요소를 비교하여 작은 것부터 결과 배열에 추가</li>
+            <li>각 배열의 인덱스를 개별적으로 관리</li>
+        </ul>
+
+        <h4>5. 남은 요소 처리</h4>
+        <pre><code>return result.concat(left.slice(i)).concat(right.slice(j));</code></pre>
+        <ul>
+            <li>병합 과정에서 남은 요소들을 결과 배열에 추가</li>
+            <li><code>slice(i)</code>: i 인덱스부터 끝까지의 요소들</li>
+        </ul>
+
+        <h3>실행 과정 예시</h3>
+        <pre><code>원본 배열: [64, 34, 25, 12, 22, 11, 90]
+
+분할 과정:
+[64, 34, 25, 12, 22, 11, 90]
+├── [64, 34, 25] ──┐
+│   ├── [64] ──┐   │
+│   │   └── [34, 25] ──┐
+│   │       ├── [34]   │
+│   │       └── [25]   │
+│   └── [25, 34] ──┐   │
+└── [12, 22, 11, 90] ──┘
+    ├── [12, 22] ──┐
+    │   ├── [12]   │
+    │   └── [22]   │
+    │   └── [12, 22] ──┐
+    └── [11, 90] ──┘
+        ├── [11]   │
+        └── [90]   │
+        └── [11, 90] ──┘
+
+병합 과정:
+[25, 34] + [64] → [25, 34, 64]
+[12, 22] + [11, 90] → [11, 12, 22, 90]
+[25, 34, 64] + [11, 12, 22, 90] → [11, 12, 22, 25, 34, 64, 90]
+
+최종 결과: [11, 12, 22, 25, 34, 64, 90]</code></pre>
+
+        <h2>시간 복잡도</h2>
+        <ul>
+            <li><strong>모든 케이스</strong>: O(n log n)
+                <ul>
+                    <li>분할: O(log n) 단계</li>
+                    <li>각 단계에서 병합: O(n)</li>
+                    <li>총 시간: O(n log n)</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2>공간 복잡도</h2>
+        <ul>
+            <li><strong>O(n)</strong>: 병합 과정에서 임시 배열이 필요</li>
+            <li>재귀 호출 스택: O(log n)</li>
+            <li>총 공간: O(n)</li>
+        </ul>
+
+        <h2>장단점</h2>
+
+        <h3>장점</h3>
+        <ol>
+            <li><strong>안정적 성능</strong>: 최악 케이스에서도 O(n log n) 보장</li>
+            <li><strong>안정 정렬</strong>: 같은 값의 상대적 순서가 유지됨</li>
+            <li><strong>예측 가능</strong>: 입력 데이터에 관계없이 일정한 성능</li>
+            <li><strong>병렬화 가능</strong>: 분할된 부분을 병렬로 처리 가능</li>
+        </ol>
+
+        <h3>단점</h3>
+        <ol>
+            <li><strong>추가 메모리</strong>: O(n)의 추가 공간 필요</li>
+            <li><strong>캐시 비효율</strong>: 배열 접근 패턴이 캐시에 불리함</li>
+            <li><strong>작은 배열에서 비효율</strong>: 작은 배열에서는 삽입 정렬보다 느림</li>
+        </ol>
+
+        <h2>최적화 방안</h2>
+        <ol>
+            <li><strong>작은 배열 처리</strong>
+                <ul>
+                    <li>작은 배열(예: 10개 이하)은 삽입 정렬 사용</li>
+                </ul>
+            </li>
+            <li><strong>제자리 병합</strong>
+                <ul>
+                    <li>추가 메모리 없이 병합하는 방법</li>
+                </ul>
+            </li>
+            <li><strong>병렬 처리</strong>
+                <ul>
+                    <li>분할된 부분을 병렬로 정렬</li>
+                </ul>
+            </li>
+            <li><strong>자연 병합 정렬</strong>
+                <ul>
+                    <li>이미 정렬된 부분을 활용</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h2>사용법</h2>
+        <pre><code>import { mergeSort, arr } from './MergeSort';
+
+console.log('원본 배열:', arr);
+const sortedArr = mergeSort(arr);
+console.log('정렬된 배열:', sortedArr);</code></pre>
+
+        <h2>다른 정렬 알고리즘과의 비교</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>알고리즘</th>
+                    <th>평균 시간</th>
+                    <th>최악 시간</th>
+                    <th>공간 복잡도</th>
+                    <th>안정성</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>병합 정렬</td>
+                    <td>O(n log n)</td>
+                    <td>O(n log n)</td>
+                    <td>O(n)</td>
+                    <td>안정</td>
+                </tr>
+                <tr>
+                    <td>퀵 정렬</td>
+                    <td>O(n log n)</td>
+                    <td>O(n²)</td>
+                    <td>O(log n)</td>
+                    <td>불안정</td>
+                </tr>
+                <tr>
+                    <td>힙 정렬</td>
+                    <td>O(n log n)</td>
+                    <td>O(n log n)</td>
+                    <td>O(1)</td>
+                    <td>불안정</td>
+                </tr>
+                <tr>
+                    <td>삽입 정렬</td>
+                    <td>O(n²)</td>
+                    <td>O(n²)</td>
+                    <td>O(1)</td>
+                    <td>안정</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>병합 정렬의 특징</h2>
+        <ol>
+            <li><strong>분할 정복</strong>: 문제를 작은 부분으로 나누어 해결</li>
+            <li><strong>안정 정렬</strong>: 같은 값의 순서가 유지됨</li>
+            <li><strong>외부 정렬</strong>: 대용량 데이터 정렬에 적합</li>
+            <li><strong>재귀적</strong>: 자연스러운 재귀 구조</li>
+        </ol>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>재귀 알고리즘 (Recursive Algorithms)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #3498db;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #34495e;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-left: 0.5rem;
+            border-left: 4px solid #3498db;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #555;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.7;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e83e8c;
+        }
+
+        pre {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: 0.9rem;
+        }
+
+        strong {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>재귀 알고리즘 (Recursive Algorithms)</h1>
+
+        <p>이 폴더는 순수한 재귀 알고리즘들의 구현을 포함합니다.</p>
+
+        <h2>파일 목록</h2>
+
+        <h3>Recursive.ts</h3>
+        <p>기본적인 재귀 알고리즘들의 모음입니다.</p>
+
+        <h4>구현된 함수들:</h4>
+        <ul>
+            <li><strong>factorial(n)</strong>: 팩토리얼 계산</li>
+            <li><strong>listRecursion(list)</strong>: 배열 요소들의 합을 재귀적으로 계산</li>
+            <li><strong>palindrome(str)</strong>: 문자열이 팰린드롬인지 확인</li>
+            <li><strong>collatz(n)</strong>: 콜라츠 추측 알고리즘</li>
+            <li><strong>countWays(n)</strong>: n을 1, 2, 3의 합으로 나타내는 방법의 수</li>
+        </ul>
+
+        <h2>팩토리얼 (Factorial)</h2>
+
+        <h3>문제 설명</h3>
+        <p>n! = n × (n-1) × (n-2) × ... × 1을 계산하는 문제입니다.</p>
+
+        <h3>재귀적 해결 방법</h3>
+        <ul>
+            <li><strong>기저 케이스</strong>: n ≤ 1일 때 1 반환</li>
+            <li><strong>재귀 케이스</strong>: n × factorial(n-1)</li>
+        </ul>
+
+        <h3>구현</h3>
+        <pre><code>export const factorial = (n: number): number => {
+  if (n &lt;= 1) return 1;
+  return n * factorial(n - 1);
+};</code></pre>
+
+        <h3>예시</h3>
+        <ul>
+            <li>factorial(5) = 5 × 4 × 3 × 2 × 1 = 120</li>
+            <li>factorial(3) = 3 × 2 × 1 = 6</li>
+        </ul>
+
+        <h2>리스트 재귀 (List Recursion)</h2>
+
+        <h3>문제 설명</h3>
+        <p>배열의 모든 요소를 재귀적으로 더하는 문제입니다.</p>
+
+        <h3>재귀적 해결 방법</h3>
+        <ul>
+            <li><strong>기저 케이스</strong>: 빈 배열일 때 0 반환</li>
+            <li><strong>재귀 케이스</strong>: 첫 번째 요소 + 나머지 배열의 합</li>
+        </ul>
+
+        <h3>구현</h3>
+        <pre><code>export const listRecursion = (list: number[]): number => {
+  if (list.length === 0) return 0;
+  return list[0] + listRecursion(list.slice(1));
+};</code></pre>
+
+        <h3>예시</h3>
+        <ul>
+            <li>listRecursion([1, 2, 3, 4]) = 1 + 2 + 3 + 4 = 10</li>
+            <li>listRecursion([5, 10]) = 5 + 10 = 15</li>
+        </ul>
+
+        <h2>팰린드롬 (Palindrome)</h2>
+
+        <h3>문제 설명</h3>
+        <p>문자열이 앞뒤로 읽어도 같은지 확인하는 문제입니다.</p>
+
+        <h3>재귀적 해결 방법</h3>
+        <ul>
+            <li><strong>기저 케이스</strong>: 문자열 길이가 1 이하일 때 true</li>
+            <li><strong>재귀 케이스</strong>: 첫 글자와 마지막 글자가 같고, 나머지 부분이 팰린드롬</li>
+        </ul>
+
+        <h3>구현</h3>
+        <pre><code>export const palindrome = (str: string): boolean => {
+  if (str.length &lt;= 1) return true;
+  return str[0] === str[str.length - 1] && palindrome(str.slice(1, -1));
+};</code></pre>
+
+        <h3>예시</h3>
+        <ul>
+            <li>palindrome("racecar") = true</li>
+            <li>palindrome("hello") = false</li>
+            <li>palindrome("anna") = true</li>
+        </ul>
+
+        <h2>콜라츠 추측 (Collatz Conjecture)</h2>
+
+        <h3>문제 설명</h3>
+        <p>주어진 수에 대해 다음 규칙을 적용하여 1이 될 때까지의 단계 수를 계산합니다:</p>
+        <ul>
+            <li>짝수면 2로 나누기</li>
+            <li>홀수면 3을 곱하고 1 더하기</li>
+        </ul>
+
+        <h3>재귀적 해결 방법</h3>
+        <ul>
+            <li><strong>기저 케이스</strong>: n이 1일 때 1 반환</li>
+            <li><strong>재귀 케이스</strong>: 짝수면 n/2, 홀수면 3n+1에 대해 재귀 호출</li>
+        </ul>
+
+        <h3>구현</h3>
+        <pre><code>export const collatz = (n: number): number => {
+  if (n === 1) return 1;
+  if (n % 2 === 0) return collatz(n / 2);
+  return collatz(3 * n + 1);
+};</code></pre>
+
+        <h3>예시</h3>
+        <ul>
+            <li>collatz(6) → 3 → 10 → 5 → 16 → 8 → 4 → 2 → 1 (8단계)</li>
+            <li>collatz(7) → 22 → 11 → 34 → 17 → 52 → 26 → 13 → 40 → 20 → 10 → 5 → 16 → 8 → 4 → 2 → 1 (16단계)</li>
+        </ul>
+
+        <h2>카운트 웨이즈 (Count Ways)</h2>
+
+        <h3>문제 설명</h3>
+        <p>n을 1, 2, 3의 합으로 나타내는 방법의 수를 계산하는 문제입니다.</p>
+
+        <h3>재귀적 해결 방법</h3>
+        <ul>
+            <li><strong>기저 케이스</strong>: n이 0일 때 1, n이 음수일 때 0</li>
+            <li><strong>재귀 케이스</strong>: countWays(n-1) + countWays(n-2) + countWays(n-3)</li>
+        </ul>
+
+        <h3>구현</h3>
+        <pre><code>export const countWays = (n: number): number => {
+  if (n === 0) return 1;
+  if (n &lt; 0) return 0;
+  return countWays(n - 1) + countWays(n - 2) + countWays(n - 3);
+};</code></pre>
+
+        <h3>예시</h3>
+        <ul>
+            <li>countWays(3) = 4
+                <ul>
+                    <li>1+1+1, 1+2, 2+1, 3</li>
+                </ul>
+            </li>
+            <li>countWays(4) = 7
+                <ul>
+                    <li>1+1+1+1, 1+1+2, 1+2+1, 2+1+1, 2+2, 1+3, 3+1</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2>사용법</h2>
+        <pre><code>import { factorial, listRecursion, palindrome, collatz, countWays } from './Recursive';
+
+console.log(factorial(5)); // 120
+console.log(listRecursion([1, 2, 3, 4])); // 10
+console.log(palindrome("racecar")); // true
+console.log(collatz(6)); // 8
+console.log(countWays(3)); // 4</code></pre>
+
+        <h2>시간 복잡도</h2>
+        <ul>
+            <li><strong>factorial</strong>: O(n)</li>
+            <li><strong>listRecursion</strong>: O(n)</li>
+            <li><strong>palindrome</strong>: O(n)</li>
+            <li><strong>collatz</strong>: O(log n) (평균적으로)</li>
+            <li><strong>countWays</strong>: O(3^n) (지수적)</li>
+        </ul>
+
+        <h2>공간 복잡도</h2>
+        <p>모든 함수는 재귀 호출 스택으로 인해 O(n)의 공간 복잡도를 가집니다.</p>
+
+        <h2>재귀의 장단점</h2>
+
+        <h3>장점</h3>
+        <ol>
+            <li><strong>직관적</strong>: 문제를 자연스럽게 분해</li>
+            <li><strong>간결</strong>: 복잡한 반복문 없이 구현 가능</li>
+            <li><strong>수학적</strong>: 수학적 정의와 일치</li>
+        </ol>
+
+        <h3>단점</h3>
+        <ol>
+            <li><strong>스택 오버플로우</strong>: 깊은 재귀 시 메모리 부족</li>
+            <li><strong>성능</strong>: 중복 계산으로 인한 비효율성</li>
+            <li><strong>디버깅</strong>: 복잡한 호출 스택으로 인한 어려움</li>
+        </ol>
+    </div>
+</body>
+</html>
+

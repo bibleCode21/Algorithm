@@ -80,6 +80,106 @@ function prim(startNode: string, edges: Edge[]): Edge[] {
     return mst;
 }
 
+/**
+ * 개선된 Prim 알고리즘 (heapdict 방식)
+ * 각 노드의 최소 가중치를 추적하여 더 효율적으로 동작
+ * @param startNode 시작 노드
+ * @param edges 간선 리스트 [가중치, 노드1, 노드2]
+ * @returns [최소 신장 트리(MST)의 간선 리스트, 총 가중치]
+ */
+const advancedPrim = (startNode: string, edges: Edge[]): [Edge[], number] => {
+    const mst: Edge[] = [];
+    
+    // 그래프를 인접 리스트로 변환 (무방향 그래프)
+    const graph = new Map<string, Map<string, number>>();
+    
+    // 모든 노드 수집
+    const allNodes = new Set<string>();
+    for (const [weight, n1, n2] of edges) {
+        allNodes.add(n1);
+        allNodes.add(n2);
+        
+        // n1 -> n2
+        if (!graph.has(n1)) {
+            graph.set(n1, new Map());
+        }
+        graph.get(n1)!.set(n2, weight);
+        
+        // n2 -> n1 (무방향)
+        if (!graph.has(n2)) {
+            graph.set(n2, new Map());
+        }
+        graph.get(n2)!.set(n1, weight);
+    }
+    
+    // keys: 각 노드까지의 최소 가중치 (힙에 저장할 데이터)
+    // pi: 각 노드의 부모 노드
+    const keys = new Map<string, number>(); // [node, weight]
+    const pi = new Map<string, string | null>(); // [node, parent]
+    const visited = new Set<string>();
+    
+    // 모든 노드를 무한대로 초기화
+    for (const node of allNodes) {
+        keys.set(node, Infinity);
+        pi.set(node, null);
+    }
+    
+    // 시작 노드는 0으로 설정
+    keys.set(startNode, 0);
+    pi.set(startNode, startNode);
+    
+    // MinHeap: [weight, node] 형태로 저장
+    const heap = new MinHeap<[number, string]>((a, b) => a[0] - b[0]);
+    
+    // 모든 노드를 힙에 추가
+    for (const [node, weight] of keys.entries()) {
+        heap.insert([weight, node]);
+    }
+    
+    // 힙이 빌 때까지 반복
+    while (!heap.isEmpty()) {
+        const item = heap.pop();
+        if (item === null) break;
+        
+        const [currentKey, currentNode] = item;
+        
+        // 이미 처리된 노드는 건너뛰기 (힙에 중복으로 들어갈 수 있음)
+        if (visited.has(currentNode)) {
+            continue;
+        }
+        
+        visited.add(currentNode);
+        
+        // MST에 간선 추가 (시작 노드가 아닌 경우)
+        const parent = pi.get(currentNode);
+        if (parent !== null && parent !== undefined && parent !== currentNode) {
+            mst.push([currentKey, parent, currentNode]);
+        }
+        
+        // 인접 노드들의 가중치 업데이트
+        const neighbors = graph.get(currentNode);
+        if (neighbors) {
+            for (const [adjacent, weight] of neighbors.entries()) {
+                // 아직 방문하지 않았고, 더 작은 가중치를 발견한 경우
+                if (!visited.has(adjacent) && weight < keys.get(adjacent)!) {
+                    keys.set(adjacent, weight);
+                    pi.set(adjacent, currentNode);
+                    // 힙에 업데이트된 가중치로 다시 추가
+                    heap.insert([weight, adjacent]);
+                }
+            }
+        }
+    }
+    
+    // 총 가중치 계산
+    let total = 0;
+    for (const [weight] of mst) {
+        total += weight;
+    }
+    
+    return [mst, total];
+}
+
 // 테스트 실행
 console.log('=== Prim 알고리즘 테스트 ===');
 console.log('입력 간선:', myedges);
@@ -95,4 +195,14 @@ result.forEach(([weight]) => {
     totalWeight += weight;
 });
 console.log(`\n총 가중치: ${totalWeight}`);
+
+// 개선된 Prim 알고리즘 테스트
+console.log('\n=== 개선된 Prim 알고리즘 테스트 ===');
+console.log('시작 노드: A');
+const [advancedResult, advancedTotalWeight] = advancedPrim('A', myedges);
+console.log('\n최소 신장 트리(MST):');
+advancedResult.forEach(([weight, n1, n2]) => {
+    console.log(`  ${n1} - ${n2}: ${weight}`);
+});
+console.log(`\n총 가중치: ${advancedTotalWeight}`);
 

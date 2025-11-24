@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kruskal Algorithm (크루스칼 알고리즘)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #3498db;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #34495e;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-left: 0.5rem;
+            border-left: 4px solid #3498db;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #555;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.7;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #e83e8c;
+        }
+
+        pre {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: 0.9rem;
+        }
+
+        strong {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        hr {
+            border: none;
+            border-top: 2px solid #e0e0e0;
+            margin: 2rem 0;
+        }
+
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+<h1>크루스칼 알고리즘 (Kruskal's Algorithm)</h1>
+
+<h2>목차</h2>
+<ul>
+<li>[개념](#개념)</li>
+<li>[최소 신장 트리(MST)란?](#최소-신장-트리mst란)</li>
+<li>[특징](#특징)</li>
+<li>[동작 원리](#동작-원리)</li>
+<li>[Union-Find 자료구조](#union-find-자료구조)</li>
+<li>[기본 개념](#기본-개념)</li>
+<li>[주요 연산](#주요-연산)</li>
+<li>[경로 압축 (Path Compression)](#경로-압축-path-compression)</li>
+<li>[재귀 실행 과정 상세 설명](#재귀-실행-과정-상세-설명)</li>
+<li>[랭크 기반 합치기 (Union by Rank)](#랭크-기반-합치기-union-by-rank)</li>
+<li>[알고리즘 구현](#알고리즘-구현)</li>
+<li>[시간 복잡도](#시간-복잡도)</li>
+<li>[실행 예시](#실행-예시)</li>
+<li>[장점과 단점](#장점과-단점)</li>
+<li>[실행 방법](#실행-방법)</li>
+</ul>
+
+<hr>
+
+<h2>개념</h2>
+
+<p>크루스칼 알고리즘은 <strong>가중치가 있는 무방향 그래프</strong>에서 <strong>최소 신장 트리(Minimum Spanning Tree, MST)</strong>를 찾는 그리디 알고리즘입니다.</p>
+
+<p>간선을 가중치 순으로 정렬한 후, 사이클을 만들지 않는 간선들을 선택하여 최소 비용으로 모든 정점을 연결합니다.</p>
+
+<h2>최소 신장 트리(MST)란?</h2>
+
+<p><strong>신장 트리(Spanning Tree)</strong></p>
+<ul>
+<li>그래프의 모든 정점을 포함하는 트리</li>
+<li>n개의 정점을 가진 그래프의 신장 트리는 n-1개의 간선을 가짐</li>
+<li>사이클이 없어야 함</li>
+</ul>
+
+<p><strong>최소 신장 트리(Minimum Spanning Tree)</strong></p>
+<ul>
+<li>여러 신장 트리 중에서 간선 가중치의 합이 최소인 트리</li>
+<li>네트워크 설계, 도로 건설, 통신망 구축 등에 활용</li>
+</ul>
+
+<h3>예시</h3>
+<pre><code>원본 그래프:
+  A --7-- B
+  |       |
+  5       8
+  |       |
+  C --9-- D
+
+가능한 신장 트리들:
+1. A-B(7), A-C(5), C-D(9) = 총 21
+2. A-B(7), A-C(5), B-D(8) = 총 20  ← 최소 신장 트리!
+3. A-C(5), B-D(8), C-D(9) = 총 22</code></pre>
+
+<h2>특징</h2>
+
+<ul>
+<li><strong>알고리즘 종류</strong>: 그리디 알고리즘</li>
+<li><strong>시간 복잡도</strong>: O(E log E) - E는 간선의 개수</li>
+<li><strong>공간 복잡도</strong>: O(V) - V는 정점의 개수</li>
+<li><strong>적용 대상</strong>: 가중치가 있는 무방향 그래프</li>
+<li><strong>핵심 자료구조</strong>: Union-Find (Disjoint Set)</li>
+<li><strong>결과</strong>: 항상 최적해를 보장</li>
+</ul>
+
+<h2>동작 원리</h2>
+
+<p>크루스칼 알고리즘은 다음 5단계로 동작합니다:</p>
+
+<h3>1. 간선 정렬</h3>
+<p>모든 간선을 가중치 기준으로 <strong>오름차순 정렬</strong></p>
+
+<pre><code>정렬 전: [(7,A,B), (5,A,D), (8,B,C), (9,B,D)]
+정렬 후: [(5,A,D), (7,A,B), (8,B,C), (9,B,D)]</code></pre>
+
+<h3>2. 초기화</h3>
+<p>각 정점을 독립적인 집합으로 초기화 (Union-Find 자료구조 사용)</p>
+
+<pre><code>초기 상태: {A}, {B}, {C}, {D}</code></pre>
+
+<h3>3. 간선 선택</h3>
+<p>정렬된 간선을 순서대로 확인하며, <strong>사이클을 만들지 않는 간선만 선택</strong></p>
+
+<pre><code>간선 (5,A,D): A와 D가 다른 집합 → 선택! ✅
+    → 집합 상태: {A,D}, {B}, {C}
+
+간선 (7,A,B): A와 B가 다른 집합 → 선택! ✅
+    → 집합 상태: {A,B,D}, {C}
+
+간선 (8,B,C): B와 C가 다른 집합 → 선택! ✅
+    → 집합 상태: {A,B,C,D}
+
+간선 (9,B,D): B와 D가 같은 집합 → 사이클 발생! ❌ 건너뜀</code></pre>
+
+<h3>4. 종료 조건</h3>
+<p><strong>n-1개의 간선</strong>을 선택하면 알고리즘 종료 (n = 정점의 개수)</p>
+
+<pre><code>4개 정점 → 3개 간선 선택 시 종료</code></pre>
+
+<h3>5. 결과</h3>
+<p>선택된 간선들이 최소 신장 트리를 구성</p>
+
+<pre><code>MST: [(5,A,D), (7,A,B), (8,B,C)]
+총 가중치: 5 + 7 + 8 = 20</code></pre>
+
+<h2>Union-Find 자료구조</h2>
+
+<p>크루스칼 알고리즘의 핵심은 <strong>사이클 감지</strong>입니다. 이를 효율적으로 수행하기 위해 <strong>Union-Find (Disjoint Set)</strong> 자료구조를 사용합니다.</p>
+
+<h3>기본 개념</h3>
+
+<p>Union-Find는 <strong>서로소 집합(Disjoint Set)</strong>을 관리하는 자료구조입니다.</p>
+
+<pre><code>초기 상태: 각 원소가 독립적인 집합
+{A}, {B}, {C}, {D}, {E}
+
+union(A, B) 후:
+{A, B}, {C}, {D}, {E}
+
+union(C, D) 후:
+{A, B}, {C, D}, {E}
+
+union(A, C) 후:
+{A, B, C, D}, {E}</code></pre>
+
+<h3>주요 연산</h3>
+
+<h4>1. find(x): x가 속한 집합의 대표(루트) 찾기</h4>
+
+<pre><code>find(x: string): string {
+    if (this.parent.get(x) !== x) {
+        // 경로 압축: 부모를 루트로 직접 연결
+        this.parent.set(x, this.find(this.parent.get(x)!));
+    }
+    return this.parent.get(x)!;
+}</code></pre>
+
+<p><strong>동작 방식:</strong></p>
+<pre><code>A → B → C → D (D가 루트)
+
+find(A) 호출 시:
+1. A의 부모는 B → find(B) 재귀 호출
+2. B의 부모는 C → find(C) 재귀 호출
+3. C의 부모는 D → find(D) 재귀 호출
+4. D의 부모는 D → D 반환 (루트 발견!)
+5. 재귀가 돌아오면서 모든 노드를 D에 직접 연결
+
+결과: A → D, B → D, C → D (경로 압축 완료!)</code></pre>
+
+<h4>2. union(x, y): x와 y가 속한 두 집합 합치기</h4>
+
+<pre><code>union(x: string, y: string): boolean {
+    const rootX = this.find(x);
+    const rootY = this.find(y);
+
+    // 이미 같은 집합 → 사이클 발생!
+    if (rootX === rootY) {
+        return false;
+    }
+
+    // 랭크가 낮은 트리를 높은 트리에 붙임
+    const rankX = this.rank.get(rootX)!;
+    const rankY = this.rank.get(rootY)!;
+
+    if (rankX < rankY) {
+        this.parent.set(rootX, rootY);
+    } else if (rankX > rankY) {
+        this.parent.set(rootY, rootX);
+    } else {
+        this.parent.set(rootY, rootX);
+        this.rank.set(rootX, rankX + 1);
+    }
+
+    return true;
+}</code></pre>
+
+<h3>경로 압축 (Path Compression)</h3>
+
+<p>경로 압축은 <code>find</code> 연산의 성능을 최적화하는 핵심 기법입니다.</p>
+
+<h4>경로 압축 없이</h4>
+
+<pre><code>초기: A → B → C → D (D가 루트)
+
+find(A) 호출 시:
+- A → B → C → D (4번 탐색)
+- 상태 변화 없음
+
+다음 find(A) 호출 시:
+- 또 다시 A → B → C → D (4번 탐색)</code></pre>
+
+<h4>경로 압축 적용</h4>
+
+<pre><code>초기: A → B → C → D (D가 루트)
+
+find(A) 첫 호출 시:
+- 탐색하면서 경로상의 모든 노드를 루트에 직접 연결
+- 결과: A → D, B → D, C → D
+
+다음 find(A) 호출 시:
+- A → D (1번만 탐색!) ← O(1)에 가까운 성능</code></pre>
+
+<h3>재귀 실행 과정 상세 설명</h3>
+
+<p><strong>핵심 질문</strong>: <code>parent.set()</code>은 언제 실행되나요?</p>
+
+<p><strong>답</strong>: 재귀가 <strong>돌아오는(unwinding) 과정</strong>에서 실행됩니다!</p>
+
+<pre><code>this.parent.set(x, this.find(this.parent.get(x)!));
+//               ↑
+//            이것이 먼저 실행됨 (재귀 호출)
+//        ↑
+//     재귀가 반환된 후 실행됨 (set)</code></pre>
+
+<h4>단계별 실행 과정</h4>
+
+<p><strong>초기 상태</strong>: <code>A → B → C → D</code> (D가 루트)</p>
+
+<p><strong><code>find(A)</code> 호출 시:</strong></p>
+
+<pre><code>📍 1단계: 재귀 호출 (내려가기 - Going Down)
+
+find(A) 호출
+ ↓ A ≠ parent[A](B) → 재귀 호출
+ └─> find(B) 호출
+      ↓ B ≠ parent[B](C) → 재귀 호출
+      └─> find(C) 호출
+           ↓ C ≠ parent[C](D) → 재귀 호출
+           └─> find(D) 호출
+                ✅ D = parent[D] → 루트 발견!
+                return D
+
+📍 2단계: 재귀 반환 (올라오기 - Unwinding)
+
+           find(D) returns D
+           ↓
+      find(C) 재개
+      → root = D를 받음
+      → parent[C] = D 실행! ✅
+      → return D
+      ↓
+ find(B) 재개
+ → root = D를 받음
+ → parent[B] = D 실행! ✅
+ → return D
+ ↓
+find(A) 재개
+→ root = D를 받음
+→ parent[A] = D 실행! ✅
+→ return D
+
+📍 3단계: 최종 결과
+
+변경 전: A → B → C → D
+변경 후: A → D, B → D, C → D
+
+모든 노드가 루트를 직접 가리킴!</code></pre>
+
+<h4>왜 이렇게 동작하나요?</h4>
+
+<pre><code>// 루트를 먼저 알아야 set을 할 수 있습니다
+const root = this.find(this.parent.get(x)!);  // 1. 루트 찾기 (재귀)
+this.parent.set(x, root);                      // 2. 루트를 이용해 set
+
+// 한 줄로 작성하면:
+this.parent.set(x, this.find(this.parent.get(x)!));
+//                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//                  이것이 먼저 완료되어야 set 가능!</code></pre>
+
+<p><strong>핵심 포인트:</strong></p>
+<ol>
+<li><code>find()</code> 재귀 호출이 먼저 실행됨 (루트를 찾을 때까지)</li>
+<li>루트를 찾으면 그 값이 반환됨</li>
+<li>반환된 값(root)을 받아서 <code>set()</code> 실행</li>
+<li>따라서 <code>set()</code>은 재귀가 돌아오는 과정에서 실행됨</li>
+</ol>
+
+<h4>시각화된 실행 순서</h4>
+
+<pre><code>실행 순서 타임라인:
+
+시간 →
+1. find(A) 시작
+2.   find(B) 시작
+3.     find(C) 시작
+4.       find(D) 시작
+5.       find(D) 반환 D ← 루트 발견!
+6.     set(C, D) 실행 ← 재귀 반환 시점!
+7.     find(C) 반환 D
+8.   set(B, D) 실행   ← 재귀 반환 시점!
+9.   find(B) 반환 D
+10. set(A, D) 실행    ← 재귀 반환 시점!
+11. find(A) 반환 D</code></pre>
+
+<h3>랭크 기반 합치기 (Union by Rank)</h3>
+
+<p>트리의 높이를 최소화하여 <code>find</code> 연산을 빠르게 만드는 기법입니다.</p>
+
+<h4>랭크 없이 union</h4>
+
+<pre><code>집합 1: A → B → C (높이 3)
+집합 2: D (높이 1)
+
+단순히 D를 A에 붙이면:
+A → B → C
+         ↓
+         D
+높이가 4로 증가! 😞</code></pre>
+
+<h4>랭크 기반 union</h4>
+
+<pre><code>집합 1: A → B → C (rank 3)
+집합 2: D (rank 1)
+
+rank가 낮은 D를 높은 A에 붙임:
+A → B → C
+↑
+D
+높이가 3으로 유지! 😊</code></pre>
+
+<p><strong>코드:</strong></p>
+<pre><code>if (rankX < rankY) {
+    this.parent.set(rootX, rootY);  // X를 Y에 붙임
+} else if (rankX > rankY) {
+    this.parent.set(rootY, rootX);  // Y를 X에 붙임
+} else {
+    this.parent.set(rootY, rootX);  // 같으면 한쪽에 붙이고
+    this.rank.set(rootX, rankX + 1); // rank 증가
+}</code></pre>
+
+<h2>알고리즘 구현</h2>
+
+<h3>전체 코드 구조</h3>
+
+<pre><code>type Edge = [number, string, string];  // [가중치, 정점1, 정점2]
+
+type KruskalGraph = {
+    vertices: string[];  // 정점 배열
+    edges: Edge[];       // 간선 배열
+};
+
+function kruskal(graph: KruskalGraph): Edge[] {
+    const mst: Edge[] = [];
+    const uf = new UnionFind(graph.vertices);
+
+    // 1. 간선을 가중치 순으로 정렬
+    const sortedEdges = [...graph.edges].sort((a, b) => a[0] - b[0]);
+
+    // 2. 간선을 하나씩 확인
+    for (const edge of sortedEdges) {
+        const [weight, vertex1, vertex2] = edge;
+
+        // 3. 사이클 확인 및 추가
+        if (uf.union(vertex1, vertex2)) {
+            mst.push(edge);
+        }
+
+        // 4. n-1개 선택하면 종료
+        if (mst.length === graph.vertices.length - 1) {
+            break;
+        }
+    }
+
+    return mst;
+}</code></pre>
+
+<h2>시간 복잡도</h2>
+
+<table>
+<thead>
+<tr>
+<th>연산</th>
+<th>시간 복잡도</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>간선 정렬</td>
+<td>O(E log E)</td>
+<td>E개의 간선을 정렬</td>
+</tr>
+<tr>
+<td>Union-Find 초기화</td>
+<td>O(V)</td>
+<td>V개의 정점 초기화</td>
+</tr>
+<tr>
+<td>find 연산</td>
+<td>O(α(V))</td>
+<td>거의 O(1) (아커만 함수의 역함수)</td>
+</tr>
+<tr>
+<td>union 연산</td>
+<td>O(α(V))</td>
+<td>거의 O(1)</td>
+</tr>
+<tr>
+<td>전체 알고리즘</td>
+<td><strong>O(E log E)</strong></td>
+<td>정렬이 지배적</td>
+</tr>
+</tbody>
+</table>
+
+<p>여기서 α(V)는 아커만 함수의 역함수로, 실질적으로 상수 시간으로 간주됩니다.</p>
+
+<p><strong>최적화 포인트:</strong></p>
+<ul>
+<li>경로 압축: find 연산을 거의 O(1)로 만듦</li>
+<li>랭크 기반 합치기: 트리 높이를 낮게 유지</li>
+<li>조기 종료: n-1개 간선 선택 시 즉시 종료</li>
+</ul>
+
+<h2>실행 예시</h2>
+
+<h3>예제 그래프</h3>
+
+<pre><code>정점: A, B, C, D, E, F, G
+간선:
+  A - B: 7    B - C: 8    D - E: 7
+  A - D: 5    B - D: 9    D - F: 6
+  B - E: 7    C - E: 5    E - F: 8
+  E - G: 9    F - G: 11</code></pre>
+
+<h3>실행 과정</h3>
+
+<pre><code>=== 1단계: 간선 정렬 ===
+(5,A-D), (5,C-E), (6,D-F), (7,A-B), (7,B-E), (7,D-E), 
+(8,B-C), (8,E-F), (9,B-D), (9,E-G), (11,F-G)
+
+=== 2단계: 간선 선택 ===
+✅ (5,A-D): 추가 - MST 간선 수: 1
+✅ (5,C-E): 추가 - MST 간선 수: 2
+✅ (6,D-F): 추가 - MST 간선 수: 3
+✅ (7,A-B): 추가 - MST 간선 수: 4
+✅ (7,B-E): 추가 - MST 간선 수: 5
+❌ (7,D-E): 사이클 발생! 건너뜀
+❌ (8,B-C): 사이클 발생! 건너뜀
+❌ (8,E-F): 사이클 발생! 건너뜀
+❌ (9,B-D): 사이클 발생! 건너뜀
+✅ (9,E-G): 추가 - MST 간선 수: 6
+
+🎉 MST 완성! (7개 정점 → 6개 간선)
+
+=== 3단계: 최종 결과 ===
+최소 신장 트리:
+1. A - D: 5
+2. C - E: 5
+3. D - F: 6
+4. A - B: 7
+5. B - E: 7
+6. E - G: 9
+
+총 가중치: 39</code></pre>
+
+<h3>실행 결과 (터미널)</h3>
+
+<pre><code>╔════════════════════════════════════════╗
+║     크루스칼 알고리즘 (Kruskal MST)    ║
+╚════════════════════════════════════════╝
+
+그래프 정보:
+정점: A, B, C, D, E, F, G
+간선 수: 11
+
+간선 목록 (가중치, 시작점, 끝점):
+  A - B: 7
+  A - D: 5
+  ...
+
+최소 신장 트리 (MST):
+  1. A - D: 5
+  2. C - E: 5
+  3. D - F: 6
+  4. A - B: 7
+  5. B - E: 7
+  6. E - G: 9
+
+총 가중치: 39
+간선 개수: 6 (정점 수 7 - 1)</code></pre>
+
+<h2>장점과 단점</h2>
+
+<h3>장점</h3>
+
+<ol>
+<li><strong>구현이 직관적</strong></li>
+<li>간선을 정렬하고 순서대로 선택</li>
+<li>이해하기 쉬운 알고리즘</li>
+</ol>
+
+<ol>
+<li><strong>희소 그래프에 효율적</strong></li>
+<li>간선이 적을 때 유리</li>
+<li>O(E log E)는 간선 수에 비례</li>
+</ol>
+
+<ol>
+<li><strong>항상 최적해 보장</strong></li>
+<li>그리디 알고리즘이지만 항상 MST를 찾음</li>
+<li>증명된 정확성</li>
+</ol>
+
+<ol>
+<li><strong>메모리 효율적</strong></li>
+<li>Union-Find만 O(V) 공간 사용</li>
+<li>인접 행렬 불필요</li>
+</ol>
+
+<h3>단점</h3>
+
+<ol>
+<li><strong>정렬 필요</strong></li>
+<li>간선을 먼저 정렬해야 함</li>
+<li>O(E log E) 시간 소요</li>
+</ol>
+
+<ol>
+<li><strong>간선 중심 알고리즘</strong></li>
+<li>간선이 많으면 비효율적</li>
+<li>밀집 그래프에는 프림 알고리즘이 더 효율적</li>
+</ol>
+
+<ol>
+<li><strong>온라인 알고리즘 아님</strong></li>
+<li>모든 간선 정보가 미리 필요</li>
+<li>동적으로 간선 추가 시 재계산 필요</li>
+</ol>
+
+<h3>크루스칼 vs 프림 알고리즘</h3>
+
+<table>
+<thead>
+<tr>
+<th>특징</th>
+<th>크루스칼</th>
+<th>프림</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>접근 방식</td>
+<td>간선 중심</td>
+<td>정점 중심</td>
+</tr>
+<tr>
+<td>시간 복잡도</td>
+<td>O(E log E)</td>
+<td>O(E log V)</td>
+</tr>
+<tr>
+<td>적합한 그래프</td>
+<td>희소 그래프</td>
+<td>밀집 그래프</td>
+</tr>
+<tr>
+<td>자료구조</td>
+<td>Union-Find</td>
+<td>우선순위 큐</td>
+</tr>
+<tr>
+<td>구현 난이도</td>
+<td>중간</td>
+<td>쉬움</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>선택 기준:</strong></p>
+<ul>
+<li>간선 수 << 정점² → 크루스칼</li>
+<li>간선 수 ≈ 정점² → 프림</li>
+</ul>
+
+<h2>실행 방법</h2>
+
+<h3>TypeScript로 실행</h3>
+
+<pre><code># 프로젝트 루트에서
+npx ts-node Ch2/Kruskal/Kruskal.ts</code></pre>
+
+<h3>예상 출력</h3>
+
+<pre><code>╔════════════════════════════════════════╗
+║     크루스칼 알고리즘 (Kruskal MST)    ║
+╚════════════════════════════════════════╝
+
+그래프 정보:
+정점: A, B, C, D, E, F, G
+간선 수: 11
+
+========================================
+크루스칼 알고리즘 실행
+========================================
+
+=== 간선 정렬 완료 ===
+가중치 순서: (5, A-D), (5, C-E), ...
+
+✅ 간선 추가: A - D (가중치: 5)
+   현재 MST 간선 수: 1
+...
+
+🎉 MST 완성! (n-1개 간선 선택 완료)
+
+총 가중치: 39</code></pre>
+
+<hr>
+
+<h2>참고 자료</h2>
+
+<ul>
+<li><strong>응용 분야</strong></li>
+<li>네트워크 설계 (최소 비용으로 모든 노드 연결)</li>
+<li>도로 건설 (최소 비용으로 모든 도시 연결)</li>
+<li>전력망 구축</li>
+<li>클러스터링 알고리즘</li>
+</ul>
+
+<ul>
+<li><strong>관련 알고리즘</strong></li>
+<li>프림 알고리즘 (Prim's Algorithm)</li>
+<li>보루프카 알고리즘 (Borůvka's Algorithm)</li>
+</ul>
+
+<hr>
+
+<p>💡 <strong>핵심 요약</strong></p>
+
+<p>크루스칼 알고리즘은:</p>
+<ol>
+<li>간선을 가중치 순으로 정렬</li>
+<li>가중치가 작은 간선부터 선택</li>
+<li>사이클이 생기지 않는 간선만 추가</li>
+<li>Union-Find로 사이클을 효율적으로 감지</li>
+<li>n-1개 간선 선택 시 완료</li>
+</ol>
+
+<p><strong>경로 압축의 마법</strong>: <code>set()</code>은 재귀가 돌아오는 과정에서 실행되어, 한 번의 <code>find()</code> 호출로 경로상의 모든 노드가 루트를 직접 가리키게 됩니다! 🚀</p>
+
+
+    </div>
+</body>
+</html>

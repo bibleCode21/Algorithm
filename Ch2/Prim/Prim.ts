@@ -113,9 +113,11 @@ const advancedPrim = (startNode: string, edges: Edge[]): [Edge[], number] => {
     }
     
     // keys: 각 노드까지의 최소 가중치 (힙에 저장할 데이터)
-    // pi: 각 노드의 부모 노드
+    // pi: 각 노드가 MST에 추가될 때, 어떤 노드와의 간선을 통해 추가되었는지를 추적
+    //     예: pi['D'] = 'A' → D는 A와의 간선을 통해 MST에 추가됨
+    //     주의: 무방향 그래프이므로 "부모"가 아니라 "연결된 노드"를 의미
     const keys = new Map<string, number>(); // [node, weight]
-    const pi = new Map<string, string | null>(); // [node, parent]
+    const pi = new Map<string, string | null>(); // [node, MST에 추가될 때 연결된 노드]
     const visited = new Set<string>();
     
     // 모든 노드를 무한대로 초기화
@@ -151,9 +153,13 @@ const advancedPrim = (startNode: string, edges: Edge[]): [Edge[], number] => {
         visited.add(currentNode);
         
         // MST에 간선 추가 (시작 노드가 아닌 경우)
-        const parent = pi.get(currentNode);
-        if (parent !== null && parent !== undefined && parent !== currentNode) {
-            mst.push([currentKey, parent, currentNode]);
+        // pi[currentNode]는 currentNode가 MST에 추가될 때, 어떤 노드와의 간선을 통해 추가되었는지를 의미
+        // 예: pi['D'] = 'A' → D는 A와의 간선을 통해 MST에 추가됨
+        // 주의: 무방향 그래프이므로 "부모"가 아니라 "연결된 노드"를 의미
+        const connectedNode = pi.get(currentNode);
+        if (connectedNode !== null && connectedNode !== undefined && connectedNode !== currentNode) {
+            // MST에 간선 추가: [가중치, 연결된 노드, 현재 노드]
+            mst.push([currentKey, connectedNode, currentNode]);
         }
         
         // 인접 노드들의 가중치 업데이트
@@ -163,6 +169,7 @@ const advancedPrim = (startNode: string, edges: Edge[]): [Edge[], number] => {
                 // 아직 방문하지 않았고, 더 작은 가중치를 발견한 경우
                 if (!visited.has(adjacent) && weight < keys.get(adjacent)!) {
                     keys.set(adjacent, weight);
+                    // adjacent가 MST에 추가될 때, currentNode와의 간선을 통해 추가됨을 기록
                     pi.set(adjacent, currentNode);
                     // 힙에 업데이트된 가중치로 다시 추가
                     heap.insert([weight, adjacent]);

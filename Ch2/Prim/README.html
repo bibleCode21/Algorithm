@@ -498,7 +498,10 @@ function prim(startNode: string, edges: Edge[]): Edge[] {
 <p>기본 Prim 알고리즘과의 차이점:</p>
 <ul>
 <li><strong>keys Map</strong>: 각 노드까지의 최소 가중치를 저장</li>
-<li><strong>pi Map</strong>: 각 노드의 부모 노드를 저장</li>
+<li><strong>pi Map</strong>: 각 노드가 MST에 추가될 때, <strong>어떤 노드와의 간선을 통해 추가되었는지</strong>를 추적</li>
+<li>예: <code>pi['D'] = 'A'</code> → D는 A와의 간선을 통해 MST에 추가됨</li>
+<li><strong>중요</strong>: 무방향 그래프이므로 "부모-자식" 관계가 아니라, 단순히 "어떤 노드와의 간선으로 추가되었는지"를 의미</li>
+<li>MST를 구성할 때 간선을 추적하기 위한 정보일 뿐, 방향성이 있는 부모-자식 관계는 아님</li>
 <li><strong>힙 구조</strong>: <code>[weight, node]</code> 형태로 저장하여 최소 가중치 노드를 효율적으로 선택</li>
 </ul>
 
@@ -530,9 +533,10 @@ function prim(startNode: string, edges: Edge[]): Edge[] {
     }
     
     // keys: 각 노드까지의 최소 가중치
-    // pi: 각 노드의 부모 노드
+    // pi: 각 노드가 MST에 추가될 때, 어떤 노드와의 간선을 통해 추가되었는지를 추적
+    //     예: pi['D'] = 'A' → D는 A와의 간선을 통해 MST에 추가됨
     const keys = new Map<string, number>();
-    const pi = new Map<string, string | null>();
+    const pi = new Map<string, string | null>(); // [node, MST에 추가될 때 연결된 노드]
     const visited = new Set<string>();
     
     // 모든 노드를 무한대로 초기화
@@ -608,10 +612,14 @@ function prim(startNode: string, edges: Edge[]): Edge[] {
 
 <h4># 2. keys와 pi 초기화</h4>
 <pre><code>const keys = new Map<string, number>();  // 각 노드까지의 최소 가중치
-const pi = new Map<string, string | null>();  // 각 노드의 부모 노드</code></pre>
+const pi = new Map<string, string | null>();  // 각 노드가 MST에 추가될 때 연결된 노드</code></pre>
 <ul>
 <li>모든 노드를 무한대로 초기화</li>
 <li>시작 노드는 0으로 설정</li>
+<li><strong>pi의 의미</strong>: <code>pi[node]</code>는 node가 MST에 추가될 때, <strong>어떤 노드와의 간선을 통해 추가되었는지</strong>를 나타냄</li>
+<li>예: A에서 시작해서 A-D 간선(5)을 통해 D가 추가되면, <code>pi['D'] = 'A'</code></li>
+<li><strong>중요</strong>: 무방향 그래프이므로 "부모"가 아니라 "연결된 노드"를 의미</li>
+<li>간선 (A, D)와 (D, A)는 동일하므로, 단순히 MST 구성 과정의 추적 정보일 뿐</li>
 </ul>
 
 <h4># 3. 힙에 모든 노드 추가</h4>
@@ -626,11 +634,12 @@ const pi = new Map<string, string | null>();  // 각 노드의 부모 노드</co
 <h4># 4. 가중치 업데이트</h4>
 <pre><code>if (!visited.has(adjacent) && weight < keys.get(adjacent)!) {
     keys.set(adjacent, weight);
-    pi.set(adjacent, currentNode);
+    pi.set(adjacent, currentNode);  // adjacent가 MST에 추가될 때, currentNode와의 간선을 통해 추가됨
     heap.insert([weight, adjacent]);
 }</code></pre>
 <ul>
 <li>더 작은 가중치를 발견하면 업데이트</li>
+<li><code>pi[adjacent] = currentNode</code>: adjacent 노드가 MST에 추가될 때, currentNode와의 간선을 통해 추가됨을 기록</li>
 <li>힙에 중복으로 추가되지만, <code>visited</code> Set으로 필터링</li>
 </ul>
 
@@ -666,7 +675,7 @@ const pi = new Map<string, string | null>();  // 각 노드의 부모 노드</co
 <td>명시적 (keys Map)</td>
 </tr>
 <tr>
-<td><strong>부모 추적</strong></td>
+<td><strong>연결 노드 추적</strong></td>
 <td>간선에서 추론</td>
 <td>명시적 (pi Map)</td>
 </tr>
@@ -678,11 +687,78 @@ const pi = new Map<string, string | null>();  // 각 노드의 부모 노드</co
 </tbody>
 </table>
 
+<h4>pi Map에 대한 중요 설명</h4>
+
+<p><strong>pi는 "부모"가 아닙니다!</strong></p>
+
+<p>Prim 알고리즘은 무방향 그래프에서 작동하므로, "부모-자식" 관계는 없습니다. <code>pi</code>는 단순히 <strong>MST를 구성할 때 각 노드가 어떤 노드와의 간선을 통해 추가되었는지</strong>를 추적하는 정보입니다.</p>
+
+<p><strong>예시:</strong></p>
+<pre><code>시작: A
+1. A-D 간선(5)을 통해 D 추가 → pi['D'] = 'A'
+   → 의미: D는 A와의 간선을 통해 MST에 추가됨
+   
+2. D-F 간선(6)을 통해 F 추가 → pi['F'] = 'D'
+   → 의미: F는 D와의 간선을 통해 MST에 추가됨</code></pre>
+
+<p><strong>중요한 점:</strong></p>
+<ul>
+<li><code>pi['D'] = 'A'</code>는 "A가 D의 부모"가 아니라, "D가 MST에 추가될 때 A와의 간선을 사용했다"는 의미</li>
+<li>무방향 그래프이므로 간선 (A, D)와 (D, A)는 동일</li>
+<li>MST는 트리이므로, 시작 노드를 루트로 보면 각 노드는 하나의 "연결된 노드"를 가지지만, 이것은 단순히 MST 구성 과정의 추적 정보일 뿐</li>
+<li>"부모"라는 용어는 혼란을 줄 수 있으므로, "연결된 노드" 또는 "MST에 추가될 때 연결된 노드"라고 이해하는 것이 정확합니다</li>
+</ul>
+
+<h4>`pi` Map의 의미 이해하기</h4>
+
+<p><strong>핵심 개념</strong>: <code>pi[node]</code>는 "node가 MST에 추가될 때, 어떤 노드와 연결되어 추가되었는가"를 저장합니다.</p>
+
+<p><strong>예시로 이해하기:</strong></p>
+
+<pre><code>시작 노드: A
+그래프: A-D(5), D-F(6), A-B(7), ...
+
+실행 과정:
+1. A가 시작 노드로 MST에 추가됨
+   - pi['A'] = 'A' (시작 노드는 자기 자신)
+
+2. D가 MST에 추가됨 (A-D 간선으로)
+   - pi['D'] = 'A'  → "D가 MST에 추가될 때 A와 연결되어 추가됨"
+   - MST 간선: [5, 'A', 'D']
+
+3. F가 MST에 추가됨 (D-F 간선으로)
+   - pi['F'] = 'D'  → "F가 MST에 추가될 때 D와 연결되어 추가됨"
+   - MST 간선: [6, 'D', 'F']
+
+4. B가 MST에 추가됨 (A-B 간선으로)
+   - pi['B'] = 'A'  → "B가 MST에 추가될 때 A와 연결되어 추가됨"
+   - MST 간선: [7, 'A', 'B']</code></pre>
+
+<p><strong>"부모"라는 용어에 대해:</strong></p>
+
+<ul>
+<li>Prim 알고리즘은 <strong>무방향 그래프</strong>에서 작동합니다</li>
+<li>A-D와 D-A는 동일한 간선입니다</li>
+<li><code>pi['D'] = 'A'</code>는 "D가 A와 연결되어 추가됨"을 의미할 뿐, 방향성을 의미하지 않습니다</li>
+<li>다만, MST를 <strong>트리 구조</strong>로 볼 때, 시작 노드(A)를 루트로 하면:</li>
+<li>A는 루트</li>
+<li>D는 A의 "자식" (또는 A가 D의 "부모")</li>
+<li>F는 D의 "자식" (또는 D가 F의 "부모")</li>
+<li>따라서 <code>pi</code>를 "부모"라고 부르는 것은 MST를 트리로 해석할 때의 개념입니다</li>
+</ul>
+
+<p><strong>요약:</strong></p>
+<ul>
+<li><code>pi[node]</code> = node가 MST에 추가될 때 연결된 노드</li>
+<li>무방향 그래프이므로 실제로는 단순히 "연결 관계"를 의미</li>
+<li>MST를 트리로 볼 때만 "부모-자식" 관계로 해석 가능</li>
+</ul>
+
 <h4>장점</h4>
 
 <ol>
 <li><strong>명시적 가중치 추적</strong>: 각 노드까지의 최소 가중치를 명확히 추적</li>
-<li><strong>부모 노드 추적</strong>: MST 구성 시 부모 노드를 명시적으로 저장</li>
+<li><strong>연결 추적</strong>: MST 구성 시 각 노드가 어떤 노드와의 간선을 통해 추가되었는지 명시적으로 저장</li>
 <li><strong>heapdict 호환성</strong>: Python의 <code>heapdict</code>와 유사한 방식으로 이해하기 쉬움</li>
 <li><strong>총 가중치 반환</strong>: 함수가 MST와 총 가중치를 함께 반환</li>
 </ol>

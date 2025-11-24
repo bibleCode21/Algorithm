@@ -350,7 +350,10 @@ Python의 `heapdict`와 유사한 방식으로 구현된 개선된 Prim 알고�
 
 기본 Prim 알고리즘과의 차이점:
 - **keys Map**: 각 노드까지의 최소 가중치를 저장
-- **pi Map**: 각 노드의 부모 노드를 저장
+- **pi Map**: 각 노드가 MST에 추가될 때, **어떤 노드와의 간선을 통해 추가되었는지**를 추적
+  - 예: `pi['D'] = 'A'` → D는 A와의 간선을 통해 MST에 추가됨
+  - **중요**: 무방향 그래프이므로 "부모-자식" 관계가 아니라, 단순히 "어떤 노드와의 간선으로 추가되었는지"를 의미
+  - MST를 구성할 때 간선을 추적하기 위한 정보일 뿐, 방향성이 있는 부모-자식 관계는 아님
 - **힙 구조**: `[weight, node]` 형태로 저장하여 최소 가중치 노드를 효율적으로 선택
 
 #### 전체 코드 구조
@@ -382,9 +385,10 @@ const advancedPrim = (startNode: string, edges: Edge[]): [Edge[], number] => {
     }
     
     // keys: 각 노드까지의 최소 가중치
-    // pi: 각 노드의 부모 노드
+    // pi: 각 노드가 MST에 추가될 때, 어떤 노드와의 간선을 통해 추가되었는지를 추적
+    //     예: pi['D'] = 'A' → D는 A와의 간선을 통해 MST에 추가됨
     const keys = new Map<string, number>();
-    const pi = new Map<string, string | null>();
+    const pi = new Map<string, string | null>(); // [node, MST에 추가될 때 연결된 노드]
     const visited = new Set<string>();
     
     // 모든 노드를 무한대로 초기화
@@ -462,10 +466,14 @@ const graph = new Map<string, Map<string, number>>();
 ##### 2. keys와 pi 초기화
 ```typescript
 const keys = new Map<string, number>();  // 각 노드까지의 최소 가중치
-const pi = new Map<string, string | null>();  // 각 노드의 부모 노드
+const pi = new Map<string, string | null>();  // 각 노드가 MST에 추가될 때 연결된 노드
 ```
 - 모든 노드를 무한대로 초기화
 - 시작 노드는 0으로 설정
+- **pi의 의미**: `pi[node]`는 node가 MST에 추가될 때, **어떤 노드와의 간선을 통해 추가되었는지**를 나타냄
+  - 예: A에서 시작해서 A-D 간선(5)을 통해 D가 추가되면, `pi['D'] = 'A'`
+  - **중요**: 무방향 그래프이므로 "부모"가 아니라 "연결된 노드"를 의미
+  - 간선 (A, D)와 (D, A)는 동일하므로, 단순히 MST 구성 과정의 추적 정보일 뿐
 
 ##### 3. 힙에 모든 노드 추가
 ```typescript
@@ -480,11 +488,12 @@ for (const [node, weight] of keys.entries()) {
 ```typescript
 if (!visited.has(adjacent) && weight < keys.get(adjacent)!) {
     keys.set(adjacent, weight);
-    pi.set(adjacent, currentNode);
+    pi.set(adjacent, currentNode);  // adjacent가 MST에 추가될 때, currentNode와의 간선을 통해 추가됨
     heap.insert([weight, adjacent]);
 }
 ```
 - 더 작은 가중치를 발견하면 업데이트
+- `pi[adjacent] = currentNode`: adjacent 노드가 MST에 추가될 때, currentNode와의 간선을 통해 추가됨을 기록
 - 힙에 중복으로 추가되지만, `visited` Set으로 필터링
 
 #### 기본 알고리즘 vs 개선된 알고리즘
@@ -495,13 +504,78 @@ if (!visited.has(adjacent) && weight < keys.get(adjacent)!) {
 | **힙 내용** | 간선 리스트 | [weight, node] 쌍 |
 | **중복 처리** | Set으로 간단히 처리 | visited Set으로 필터링 |
 | **가중치 추적** | 암묵적 | 명시적 (keys Map) |
-| **부모 추적** | 간선에서 추론 | 명시적 (pi Map) |
+| **연결 노드 추적** | 간선에서 추론 | 명시적 (pi Map) |
 | **Python 유사성** | 일반적인 구현 | heapdict 방식 |
+
+#### pi Map에 대한 중요 설명
+
+**pi는 "부모"가 아닙니다!**
+
+Prim 알고리즘은 무방향 그래프에서 작동하므로, "부모-자식" 관계는 없습니다. `pi`는 단순히 **MST를 구성할 때 각 노드가 어떤 노드와의 간선을 통해 추가되었는지**를 추적하는 정보입니다.
+
+**예시:**
+```
+시작: A
+1. A-D 간선(5)을 통해 D 추가 → pi['D'] = 'A'
+   → 의미: D는 A와의 간선을 통해 MST에 추가됨
+   
+2. D-F 간선(6)을 통해 F 추가 → pi['F'] = 'D'
+   → 의미: F는 D와의 간선을 통해 MST에 추가됨
+```
+
+**중요한 점:**
+- `pi['D'] = 'A'`는 "A가 D의 부모"가 아니라, "D가 MST에 추가될 때 A와의 간선을 사용했다"는 의미
+- 무방향 그래프이므로 간선 (A, D)와 (D, A)는 동일
+- MST는 트리이므로, 시작 노드를 루트로 보면 각 노드는 하나의 "연결된 노드"를 가지지만, 이것은 단순히 MST 구성 과정의 추적 정보일 뿐
+- "부모"라는 용어는 혼란을 줄 수 있으므로, "연결된 노드" 또는 "MST에 추가될 때 연결된 노드"라고 이해하는 것이 정확합니다
+
+#### `pi` Map의 의미 이해하기
+
+**핵심 개념**: `pi[node]`는 "node가 MST에 추가될 때, 어떤 노드와 연결되어 추가되었는가"를 저장합니다.
+
+**예시로 이해하기:**
+
+```
+시작 노드: A
+그래프: A-D(5), D-F(6), A-B(7), ...
+
+실행 과정:
+1. A가 시작 노드로 MST에 추가됨
+   - pi['A'] = 'A' (시작 노드는 자기 자신)
+
+2. D가 MST에 추가됨 (A-D 간선으로)
+   - pi['D'] = 'A'  → "D가 MST에 추가될 때 A와 연결되어 추가됨"
+   - MST 간선: [5, 'A', 'D']
+
+3. F가 MST에 추가됨 (D-F 간선으로)
+   - pi['F'] = 'D'  → "F가 MST에 추가될 때 D와 연결되어 추가됨"
+   - MST 간선: [6, 'D', 'F']
+
+4. B가 MST에 추가됨 (A-B 간선으로)
+   - pi['B'] = 'A'  → "B가 MST에 추가될 때 A와 연결되어 추가됨"
+   - MST 간선: [7, 'A', 'B']
+```
+
+**"부모"라는 용어에 대해:**
+
+- Prim 알고리즘은 **무방향 그래프**에서 작동합니다
+- A-D와 D-A는 동일한 간선입니다
+- `pi['D'] = 'A'`는 "D가 A와 연결되어 추가됨"을 의미할 뿐, 방향성을 의미하지 않습니다
+- 다만, MST를 **트리 구조**로 볼 때, 시작 노드(A)를 루트로 하면:
+  - A는 루트
+  - D는 A의 "자식" (또는 A가 D의 "부모")
+  - F는 D의 "자식" (또는 D가 F의 "부모")
+- 따라서 `pi`를 "부모"라고 부르는 것은 MST를 트리로 해석할 때의 개념입니다
+
+**요약:**
+- `pi[node]` = node가 MST에 추가될 때 연결된 노드
+- 무방향 그래프이므로 실제로는 단순히 "연결 관계"를 의미
+- MST를 트리로 볼 때만 "부모-자식" 관계로 해석 가능
 
 #### 장점
 
 1. **명시적 가중치 추적**: 각 노드까지의 최소 가중치를 명확히 추적
-2. **부모 노드 추적**: MST 구성 시 부모 노드를 명시적으로 저장
+2. **연결 추적**: MST 구성 시 각 노드가 어떤 노드와의 간선을 통해 추가되었는지 명시적으로 저장
 3. **heapdict 호환성**: Python의 `heapdict`와 유사한 방식으로 이해하기 쉬움
 4. **총 가중치 반환**: 함수가 MST와 총 가중치를 함께 반환
 

@@ -173,6 +173,7 @@
             border: 3px solid #333;
             padding: 2px;
             background: #333;
+            width: fit-content;
         }
 
         .chess-cell {
@@ -182,6 +183,8 @@
             justify-content: center;
             font-size: 2em;
             font-weight: bold;
+            min-width: 0;
+            min-height: 0;
         }
 
         .chess-cell.white {
@@ -224,6 +227,162 @@
             margin: 15px 0;
             border-left: 4px solid #c33;
         }
+
+        .trace-section {
+            margin-top: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .trace-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .trace-step {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #667eea;
+            display: none;
+        }
+
+        .trace-step.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .step-number {
+            background: #667eea;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .step-action {
+            background: #e3f2fd;
+            padding: 6px 10px;
+            border-radius: 6px;
+            margin: 6px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .step-action.success {
+            background: #e8f5e9;
+            border-left: 3px solid #4caf50;
+        }
+
+        .step-action.fail {
+            background: #ffebee;
+            border-left: 3px solid #f44336;
+        }
+
+        .step-action.backtrack {
+            background: #fff3e0;
+            border-left: 3px solid #ff9800;
+        }
+
+        .step-action.solution {
+            background: #e1f5fe;
+            border-left: 3px solid #00bcd4;
+        }
+
+        .step-action.info {
+            background: #f5f5f5;
+            border-left: 3px solid #9e9e9e;
+        }
+
+        .trace-board {
+            margin: 8px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .trace-board .chessboard {
+            margin: 8px auto;
+            width: 180px !important;
+            max-width: 180px !important;
+            min-width: 180px !important;
+            flex-shrink: 0;
+            display: grid !important;
+        }
+
+        .trace-board .chess-cell {
+            font-size: 1.3em;
+            min-width: 0;
+            min-height: 0;
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1;
+            position: relative;
+        }
+
+        .chess-cell.trying {
+            background: #fff9c4 !important;
+            border: 2px solid #fbc02d;
+        }
+
+        .chess-cell.conflict {
+            background: #ffcdd2 !important;
+            border: 2px solid #f44336;
+        }
+
+        .chess-cell.placed {
+            background: #c8e6c9 !important;
+        }
+
+        .trace-info {
+            background: #f5f5f5;
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin: 6px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .step-navigation {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 6px 15px;
+            font-size: 0.85em;
+        }
     </style>
 </head>
 <body>
@@ -250,9 +409,26 @@
                     <label for="n-input">N 값:</label>
                     <input type="number" id="n-input" min="1" max="10" value="4">
                     <button class="btn" onclick="solve()">해결하기</button>
+                    <button class="btn btn-secondary" onclick="traceFirstSolution()">첫 번째 해 과정 추적</button>
                 </div>
                 <div class="loading" id="loading">계산 중...</div>
                 <div id="error-message"></div>
+            </div>
+
+            <div class="section trace-section" id="trace-section" style="display: none;">
+                <h2>🔍 과정 추적</h2>
+                <div class="trace-controls">
+                    <label>목표 해:</label>
+                    <input type="text" id="target-solution" value="1,3,0,2" style="width: 200px;">
+                    <button class="btn btn-small" onclick="startTrace()">추적 시작</button>
+                </div>
+                <div id="trace-steps"></div>
+                <div class="step-navigation" id="step-navigation" style="display: none;">
+                    <button class="btn btn-small btn-secondary" onclick="previousStep()">◀ 이전</button>
+                    <span id="step-counter" style="padding: 8px 20px; font-weight: bold;"></span>
+                    <button class="btn btn-small btn-secondary" onclick="nextStep()">다음 ▶</button>
+                    <button class="btn btn-small" onclick="autoPlay()">자동 재생</button>
+                </div>
             </div>
 
             <div class="section result-section" id="result-section" style="display: none;">
@@ -347,7 +523,7 @@ function solveNQueens(N) {
             return finalResult;
         }
 
-        function createChessboard(solution, n) {
+        function createChessboard(solution, n, tryingCol = null, conflictPositions = [], currentRow = null) {
             const board = document.createElement('div');
             board.className = 'chessboard';
             board.style.setProperty('--n', n);
@@ -355,11 +531,28 @@ function solveNQueens(N) {
             for (let row = 0; row < n; row++) {
                 for (let col = 0; col < n; col++) {
                     const cell = document.createElement('div');
-                    cell.className = `chess-cell ${(row + col) % 2 === 0 ? 'white' : 'black'}`;
+                    const isWhite = (row + col) % 2 === 0;
+                    cell.className = `chess-cell ${isWhite ? 'white' : 'black'}`;
                     
-                    if (solution[row] === col) {
+                    // 이미 배치된 퀸
+                    if (row < solution.length && solution[row] === col) {
                         cell.textContent = '♛';
                         cell.style.color = '#d32f2f';
+                        cell.classList.add('placed');
+                    }
+                    // 시도 중인 위치 (현재 행)
+                    else if (currentRow !== null && row === currentRow && col === tryingCol) {
+                        cell.textContent = '?';
+                        cell.style.color = '#f57c00';
+                        cell.style.fontWeight = 'bold';
+                        cell.classList.add('trying');
+                    }
+                    // 충돌하는 기존 퀸 위치
+                    else if (conflictPositions.some(pos => pos.row === row && pos.col === col)) {
+                        cell.textContent = '♛';
+                        cell.style.color = '#d32f2f';
+                        cell.style.opacity = '0.7';
+                        cell.classList.add('conflict');
                     }
                     
                     board.appendChild(cell);
@@ -435,9 +628,274 @@ function solveNQueens(N) {
                 solve();
             }
         });
+
+        // 과정 추적 관련 변수
+        let traceSteps = [];
+        let currentStepIndex = 0;
+        let autoPlayInterval = null;
+
+        function traceFirstSolution() {
+            const nInput = document.getElementById('n-input');
+            const n = parseInt(nInput.value);
+            
+            if (n < 1 || n > 10) {
+                alert('N 값은 1부터 10 사이여야 합니다.');
+                return;
+            }
+
+            const solutions = solveNQueens(n);
+            if (solutions.length === 0) {
+                alert('해를 찾을 수 없습니다.');
+                return;
+            }
+
+            const targetSolution = solutions[0];
+            document.getElementById('target-solution').value = targetSolution.join(',');
+            startTrace();
+        }
+
+        function startTrace() {
+            const nInput = document.getElementById('n-input');
+            const n = parseInt(nInput.value);
+            const targetInput = document.getElementById('target-solution').value;
+            const targetSolution = targetInput.split(',').map(x => parseInt(x.trim()));
+
+            if (targetSolution.length !== n) {
+                alert(`해의 길이가 N(${n})과 일치하지 않습니다.`);
+                return;
+            }
+
+            traceSteps = [];
+            currentStepIndex = 0;
+
+            // 초기 상태 추가 (빈 체스판)
+            const initialStep = {
+                row: 0,
+                candidate: [],
+                action: '시작: 빈 체스판에서 첫 번째 행(행 0)부터 시작합니다.',
+                type: 'info',
+                tryingCol: null,
+                conflictPositions: []
+            };
+            traceSteps.push(initialStep);
+
+            // 추적 모드로 DFS 실행
+            traceDFS(n, 0, [], targetSolution);
+
+            if (traceSteps.length === 1) {
+                alert('해를 찾지 못했습니다. 올바른 해를 입력해주세요.');
+                return;
+            }
+
+            displayTraceSteps();
+            document.getElementById('trace-section').style.display = 'block';
+            document.getElementById('step-navigation').style.display = 'flex';
+            showStep(0);
+        }
+
+        function getConflictPositions(candidate, currentRow, currentCol, N) {
+            const conflicts = [];
+            // 현재 시도 중인 위치와 충돌하는 기존 퀸들의 위치
+            for (let row = 0; row < candidate.length; row++) {
+                const col = candidate[row];
+                // 같은 열
+                if (col === currentCol) {
+                    conflicts.push({row: row, col: col});
+                }
+                // 대각선 (왼쪽 위에서 오른쪽 아래)
+                else if (col - row === currentCol - currentRow) {
+                    conflicts.push({row: row, col: col});
+                }
+                // 대각선 (오른쪽 위에서 왼쪽 아래)
+                else if (col + row === currentCol + currentRow) {
+                    conflicts.push({row: row, col: col});
+                }
+            }
+            return conflicts;
+        }
+
+        function traceDFS(N, currentRow, currentCandidate, targetSolution) {
+            // 목표 해와 일치하는지 확인
+            if (currentRow === N) {
+                if (JSON.stringify(currentCandidate) === JSON.stringify(targetSolution)) {
+                    const step = {
+                        row: currentRow,
+                        candidate: [...currentCandidate],
+                        action: `✅ 해 발견! [${currentCandidate.join(', ')}]`,
+                        type: 'solution',
+                        tryingCol: null,
+                        conflictPositions: []
+                    };
+                    traceSteps.push(step);
+                    return true; // 해를 찾았으므로 중단
+                }
+                return false;
+            }
+
+            // 각 열을 시도
+            for (let candidateCol = 0; candidateCol < N; candidateCol++) {
+                // 시도 전 상태 기록 (체스판에 시도 중인 위치 표시)
+                const beforeStep = {
+                    row: currentRow,
+                    candidate: [...currentCandidate],
+                    action: `행 ${currentRow}에서 열 ${candidateCol} 시도 중...`,
+                    type: 'info',
+                    tryingCol: candidateCol,
+                    conflictPositions: []
+                };
+                traceSteps.push(beforeStep);
+
+                if (isAvailable(currentCandidate, candidateCol)) {
+                    // 유효한 위치 - 배치 (PUSH)
+                    const successStep = {
+                        row: currentRow + 1,
+                        candidate: [...currentCandidate, candidateCol],
+                        action: `✓ PUSH: 행 ${currentRow}에 열 ${candidateCol} 배치 성공 (유효함) → 다음 행으로 진행`,
+                        type: 'success',
+                        tryingCol: null,
+                        conflictPositions: []
+                    };
+                    traceSteps.push(successStep);
+
+                    currentCandidate.push(candidateCol);
+                    const found = traceDFS(N, currentRow + 1, currentCandidate, targetSolution);
+                    currentCandidate.pop();
+
+                    if (found) {
+                        return true; // 해를 찾았으므로 상위로 전파
+                    }
+
+                    // 백트래킹 - 하위에서 해를 찾지 못함 (POP)
+                    const backtrackStep = {
+                        row: currentRow,
+                        candidate: [...currentCandidate],
+                        action: `↩ POP: 행 ${currentRow}에서 열 ${candidateCol} 제거 (백트래킹) - 하위에서 해를 찾지 못함`,
+                        type: 'backtrack',
+                        tryingCol: null,
+                        conflictPositions: []
+                    };
+                    traceSteps.push(backtrackStep);
+                } else {
+                    // 충돌 발생 (가지치기/Pruning)
+                    const conflicts = getConflictPositions(currentCandidate, currentRow, candidateCol, N);
+                    const failStep = {
+                        row: currentRow,
+                        candidate: [...currentCandidate],
+                        action: `✗ 가지치기(Pruning): 행 ${currentRow}에 열 ${candidateCol} 배치 불가 (충돌) - 다음 열 시도`,
+                        type: 'fail',
+                        tryingCol: candidateCol,
+                        conflictPositions: conflicts
+                    };
+                    traceSteps.push(failStep);
+                }
+            }
+
+            return false;
+        }
+
+        function displayTraceSteps() {
+            const stepsDiv = document.getElementById('trace-steps');
+            stepsDiv.innerHTML = '';
+
+            traceSteps.forEach((step, index) => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'trace-step';
+                stepDiv.id = `step-${index}`;
+
+                const header = document.createElement('div');
+                header.className = 'step-header';
+
+                const stepNumber = document.createElement('div');
+                stepNumber.className = 'step-number';
+                stepNumber.textContent = `단계 ${index + 1}`;
+
+                const currentState = document.createElement('div');
+                currentState.className = 'trace-info';
+                const candidateStr = step.candidate.length > 0 ? step.candidate.join(', ') : '빈 상태';
+                currentState.textContent = `현재 상태: [${candidateStr}] | 행: ${step.row}`;
+
+                header.appendChild(stepNumber);
+                header.appendChild(currentState);
+
+                const action = document.createElement('div');
+                action.className = `step-action ${step.type}`;
+                action.textContent = step.action;
+
+                stepDiv.appendChild(header);
+                stepDiv.appendChild(action);
+
+                // 항상 체스판 표시 (빈 상태도 포함)
+                const n = parseInt(document.getElementById('n-input').value);
+                const tryingCol = step.tryingCol !== undefined ? step.tryingCol : null;
+                const conflictPositions = step.conflictPositions || [];
+                const currentRow = step.row !== undefined ? step.row : null;
+                
+                const boardContainer = document.createElement('div');
+                boardContainer.className = 'trace-board';
+                const board = createChessboard(step.candidate, n, tryingCol, conflictPositions, currentRow);
+                boardContainer.appendChild(board);
+                stepDiv.appendChild(boardContainer);
+
+                stepsDiv.appendChild(stepDiv);
+            });
+
+            updateStepCounter();
+        }
+
+        function showStep(index) {
+            // 모든 단계 숨기기
+            traceSteps.forEach((_, i) => {
+                document.getElementById(`step-${i}`).classList.remove('active');
+            });
+
+            // 현재 단계 보이기
+            if (index >= 0 && index < traceSteps.length) {
+                document.getElementById(`step-${index}`).classList.add('active');
+                document.getElementById(`step-${index}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            currentStepIndex = index;
+            updateStepCounter();
+        }
+
+        function updateStepCounter() {
+            document.getElementById('step-counter').textContent = 
+                `${currentStepIndex + 1} / ${traceSteps.length}`;
+        }
+
+        function nextStep() {
+            if (currentStepIndex < traceSteps.length - 1) {
+                showStep(currentStepIndex + 1);
+            }
+        }
+
+        function previousStep() {
+            if (currentStepIndex > 0) {
+                showStep(currentStepIndex - 1);
+            }
+        }
+
+        function autoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+                return;
+            }
+
+            currentStepIndex = -1;
+            autoPlayInterval = setInterval(() => {
+                if (currentStepIndex < traceSteps.length - 1) {
+                    nextStep();
+                } else {
+                    clearInterval(autoPlayInterval);
+                    autoPlayInterval = null;
+                }
+            }, 1000); // 1초마다 다음 단계
+        }
     </script>
 </body>
 </html>
 
 
 
+                                                                                                                                                                                                                                                                                                                                                                        
